@@ -118,19 +118,22 @@ function Chunk(img, pal)
 			for(let i = 0; i < this.blockData.length; i++)
 			{
 				let block = this.blockData[i]
+				let check = (i % 3 * 4)
 				if(block.id == id)
 				{
-					newImage.data[i * 4] = Math.min(255 / 2 * (block.height + 1), 255)
-					newImage.data[i * 4 + 1] = Math.min(255 / 2 * (block.height + 1), 255)
-					newImage.data[i * 4 + 2] = Math.min(255 / 2 * (block.height + 1), 255)
-					newImage.data[i * 4 + 3] = 255
+					let c = [20 + check, 120 + check, 220 + check]
+					newImage.data[i * 4] =		c[block.height + 1]
+					newImage.data[i * 4 + 1] =	c[block.height + 1]
+					newImage.data[i * 4 + 2] =	c[block.height + 1]
+					newImage.data[i * 4 + 3] =	255
 				}
 				else
 				{
-					newImage.data[i * 4] = Math.max(80, Math.min(285 / 2 * (block.height + 1), 255))
-					newImage.data[i * 4 + 1] = 25 * (block.height + 1)
-					newImage.data[i * 4 + 2] = 25 * (block.height + 1)
-					newImage.data[i * 4 + 3] = 255
+					let c = [60 + check, 110 + check, 230 + check]
+					newImage.data[i * 4] =		c[block.height + 1]
+					newImage.data[i * 4 + 1] =	25 * (block.height + 1) + check
+					newImage.data[i * 4 + 2] =	25 * (block.height + 1) + check
+					newImage.data[i * 4 + 3] =	255
 				}
 			}
 
