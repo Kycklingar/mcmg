@@ -6,14 +6,16 @@ function loadImage(ev)
 	var reader = new FileReader()
 
 	var img = new Image()
-	
-	reader.onload = function(e) {
-		img.src = e.target.result
+	img.onload = function(e) {
 		map = new Map(img)
 		map.generateChunks()
 		map.blockCounts()
 		map.drawBlockCounts(BC_SORT_ID)
 		document.title = map.height()
+	}
+	
+	reader.onload = function(e) {
+		img.src = e.target.result
 		
 	}
 	reader.readAsDataURL(file)
