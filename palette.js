@@ -51,6 +51,7 @@ var mapPalette = [
 	[142, 60, 46],
 	[37, 22, 16],
 	[189, 48, 49],
+	[148, 63, 97],
 	[92, 25, 29],
 	[22, 126, 134],
 	[58, 142, 140],
@@ -81,6 +82,7 @@ function palette(basePalette)
 	// Create blocks from basePalette
 	for(let i = 0; i < basePalette.length; i++)
 	{
+		// Water source can be only one color
 		if(i == 11)
 		{
 			this.blocks.push(new block(i+1, basePalette[i], 0))
