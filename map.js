@@ -203,7 +203,6 @@ function renderPalette(ctx, palette)
 
 function palettize(ctx, imgData, palette)
 {
-
 	let newImgData = ctx.createImageData(128, 128)
 	
 	for(let i = 0; i < imgData.data.length; i += 4)
@@ -215,6 +214,33 @@ function palettize(ctx, imgData, palette)
 		newImgData.data[i+1] = newPixelColor[1]
 		newImgData.data[i+2] = newPixelColor[2]
 		newImgData.data[i+3] = 255
+
+		// Dithering
+
+		// quanterror
+		let qr = imgData.data[i  ] - newPixelColor[0]
+		let qg = imgData.data[i+1] - newPixelColor[1]
+		let qb = imgData.data[i+2] - newPixelColor[2]
+
+		// Right
+		imgData.data[i + 4    ] += qr * 7 / 16
+		imgData.data[i + 4 + 1] += qg * 7 / 16
+		imgData.data[i + 4 + 2] += qb * 7 / 16
+
+		// Bottom left
+		imgData.data[i + 128 * 4 - 4    ] += qr * 3 / 16
+		imgData.data[i + 128 * 4 - 4 + 1] += qg * 3 / 16
+		imgData.data[i + 128 * 4 - 4 + 2] += qb * 3 / 16
+
+		// Bottom
+		imgData.data[i + 128 * 4    ] += qr * 5 / 16
+		imgData.data[i + 128 * 4 + 1] += qg * 5 / 16
+		imgData.data[i + 128 * 4 + 2] += qb * 5 / 16
+
+		// Bottom right
+		imgData.data[i + 128 * 4 + 4    ] += qr * 1 / 16
+		imgData.data[i + 128 * 4 + 4 + 1] += qg * 1 / 16
+		imgData.data[i + 128 * 4 + 4 + 2] += qb * 1 / 16
 	}
 
 	return newImgData
