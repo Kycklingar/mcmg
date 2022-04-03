@@ -11,6 +11,10 @@ function BlockCounter()
 {
 	this.blocks = []
 
+	this.reset = function() {
+		this.blocks = []
+	}
+
 	this.add = function(block, num) {
 		for(let i = 0; i < this.blocks.length; i++)
 		{

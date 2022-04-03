@@ -27,6 +27,18 @@ function Map(img)
 	this.img = img
 
 	this.pal = null
+	this.w = 128
+	this.h = 128
+	console.log(this.width, this.height)
+
+	this.resize = function(e){
+		this.w = e.target.value
+		this.h = e.target.value
+		this.generateChunks()
+		this.blockCounts()
+		this.drawBlockCounts(BC_SORT_ID)
+		document.title = this.height()
+	}
 	
 	this.generateChunks = function(){
 		var mapEl = document.getElementById("map")
@@ -35,40 +47,42 @@ function Map(img)
 		this.pal = new palette(mapPalette)
 		let rawPalette = this.pal.rawFullPalette()
 
-
 		var canvas = document.getElementById("fullmap")
 		var ctx = canvas.getContext("2d")
-
-		//canvas.width = img.width
-		//canvas.height = img.height
-		//ctx.drawImage(img, 0, 0, 128, 128)
 
 		var oc = document.createElement("canvas")
 		var octx = oc.getContext("2d")
 
-		canvas.width = 512
-		canvas.height = 512
-		ctx.drawImage(this.img, 0, 0, 512, 512)
+		canvas.width = this.w * 4
+		canvas.height = this.h * 4
+		ctx.drawImage(this.img, 0, 0, canvas.width, canvas.height)
 
-		oc.width = 256
-		oc.height = 256
-		octx.drawImage(canvas, 0, 0, 256, 256)
+		oc.width = canvas.width / 2
+		oc.height = canvas.height / 2
+		octx.drawImage(canvas, 0, 0, oc.width, oc.height)
 		
-		canvas.width = 128
-		canvas.height = 128
+		canvas.width = this.w
+		canvas.height = this.h
 		ctx.drawImage(oc, 0, 0, canvas.width, canvas.height)
 
 
 		let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
 
-		let newImgData = palettize(ctx, imgData, rawPalette)
+		let newImgData = palettize(ctx, imgData, rawPalette, canvas.width, canvas.height)
+
+		let chunkWidth = canvas.width / 16
+		let chunkHeight = canvas.height / 16
+
+		mapEl.style.width = (4 * canvas.width + chunkWidth) + "px"
+
+		this.chunks = []
 
 		// Split image into chunks
-		for(let i = 0; i < 8; i++)
+		for(let i = 0; i < chunkWidth; i++)
 		{
-			for(let j = 0; j < 8; j++)
+			for(let j = 0; j < chunkHeight; j++)
 			{
-				let nimg = cutImage(newImgData, j, i)
+				let nimg = cutImage(newImgData, j, i, canvas.width, canvas.height)
 				let chunk = new Chunk(nimg, this.pal)
 				chunk.buildBlockData()
 				this.chunks.push(chunk)
@@ -81,6 +95,8 @@ function Map(img)
 	this.blockCounter = new BlockCounter()
 
 	this.blockCounts = function() {
+		this.blockCounter.reset()
+
 		let count = 0
 		for(let i = 0; i < this.chunks.length; i++)
 		{
@@ -166,7 +182,7 @@ function Map(img)
 	}
 }
 
-function cutImage(idata, i, j)
+function cutImage(idata, i, j, w, h)
 {
 	var nidata = new ImageData(16, 16)
 
@@ -174,7 +190,7 @@ function cutImage(idata, i, j)
 	{
 		for(let x = 0; x < 16; x++)
 		{
-			let index = i * 16 + j * 128 * 16 + y * 128 + x
+			let index = i * 16 + j * w * 16 + y * h + x
 			let index2 = y * 16 + x
 
 			nidata.data[4 * index2] = idata.data[4 * index]
@@ -201,10 +217,11 @@ function renderPalette(ctx, palette)
 	return newImgData
 }
 
-function palettize(ctx, imgData, palette)
+function palettize(ctx, imgData, palette, w, h)
 {
-	let newImgData = ctx.createImageData(128, 128)
+	let newImgData = ctx.createImageData(w, h)
 	
+	let wo = w * 4
 	for(let i = 0; i < imgData.data.length; i += 4)
 	{
 		let pixelColor = [imgData.data[i], imgData.data[i+1], imgData.data[i+2]]
@@ -228,19 +245,19 @@ function palettize(ctx, imgData, palette)
 		imgData.data[i + 4 + 2] += qb * 7 / 16
 
 		// Bottom left
-		imgData.data[i + 128 * 4 - 4    ] += qr * 3 / 16
-		imgData.data[i + 128 * 4 - 4 + 1] += qg * 3 / 16
-		imgData.data[i + 128 * 4 - 4 + 2] += qb * 3 / 16
+		imgData.data[i + wo - 4    ] += qr * 3 / 16
+		imgData.data[i + wo - 4 + 1] += qg * 3 / 16
+		imgData.data[i + wo - 4 + 2] += qb * 3 / 16
 
 		// Bottom
-		imgData.data[i + 128 * 4    ] += qr * 5 / 16
-		imgData.data[i + 128 * 4 + 1] += qg * 5 / 16
-		imgData.data[i + 128 * 4 + 2] += qb * 5 / 16
+		imgData.data[i + wo    ] += qr * 5 / 16
+		imgData.data[i + wo + 1] += qg * 5 / 16
+		imgData.data[i + wo + 2] += qb * 5 / 16
 
 		// Bottom right
-		imgData.data[i + 128 * 4 + 4    ] += qr * 1 / 16
-		imgData.data[i + 128 * 4 + 4 + 1] += qg * 1 / 16
-		imgData.data[i + 128 * 4 + 4 + 2] += qb * 1 / 16
+		imgData.data[i + wo + 4    ] += qr * 1 / 16
+		imgData.data[i + wo + 4 + 1] += qg * 1 / 16
+		imgData.data[i + wo + 4 + 2] += qb * 1 / 16
 	}
 
 	return newImgData
