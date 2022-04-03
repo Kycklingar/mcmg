@@ -158,9 +158,27 @@ function Chunk(img, pal)
 			let tr = document.createElement("tr")
 			let tdl = document.createElement("td")
 			let tdr = document.createElement("td")
+			let tdr2 = document.createElement("td")
 
 			tdl.innerText = bc.block.id + " " + blockNames[bc.block.id]
 			tdr.innerText = bc.count
+
+			// How many stacks
+			let stacks = 0
+			let reminder = 0
+			for (let i = bc.count; i > 0; i -= 64)
+			{
+				if (i > 64)
+				{
+					stacks++
+				}
+				else
+				{
+					reminder = i
+				}
+			}
+
+			tdr2.innerText = "(" + stacks + "+" + reminder + ")"
 
 			tr.title = blockDetails[bc.block.id]
 			tr.addEventListener("click", function(){this.render(bc.block.id)}.bind(this), false)
@@ -168,6 +186,7 @@ function Chunk(img, pal)
 
 			tr.appendChild(tdl)
 			tr.appendChild(tdr)
+			tr.appendChild(tdr2)
 			tb.appendChild(tr)
 		}
 
